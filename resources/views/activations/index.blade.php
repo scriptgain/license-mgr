@@ -48,10 +48,15 @@
                 <thead>
                     <tr>
                         <th class="w-10">
-                            <input type="checkbox" x-on:change="toggleAll($event)"
-                                :checked="selected.length > 0 && selected.length === allIds.length"
-                                :disabled="allIds.length === 0"
-                                class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 align-middle" aria-label="Select all activations">
+                            <button type="button" role="switch"
+                                :aria-checked="(allIds.length > 0 && selected.length === allIds.length).toString()"
+                                @click="selected = (allIds.length > 0 && selected.length === allIds.length) ? [] : [...allIds]"
+                                :class="(allIds.length > 0 && selected.length === allIds.length) ? 'bg-brand-600' : 'bg-slate-300'"
+                                class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors align-middle disabled:opacity-40"
+                                :disabled="allIds.length === 0" aria-label="Select all activations">
+                                <span :class="(allIds.length > 0 && selected.length === allIds.length) ? 'translate-x-6' : 'translate-x-1'"
+                                    class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"></span>
+                            </button>
                         </th>
                         <th>License Key</th><th>Product</th><th>Fingerprint</th><th>Host</th><th>IP</th><th>Last Seen</th><th class="text-right">Actions</th>
                     </tr>
@@ -60,8 +65,15 @@
                     @foreach ($activations as $a)
                         <tr>
                             <td>
-                                <input type="checkbox" x-model.number="selected" value="{{ $a->id }}" x-on:change="confirming = false"
-                                    class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 align-middle" aria-label="Select activation">
+                                <button type="button" role="switch"
+                                    :aria-checked="selected.includes({{ $a->id }}).toString()"
+                                    @click="selected.includes({{ $a->id }}) ? selected.splice(selected.indexOf({{ $a->id }}), 1) : selected.push({{ $a->id }}); confirming = false"
+                                    :class="selected.includes({{ $a->id }}) ? 'bg-brand-600' : 'bg-slate-300'"
+                                    class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors align-middle"
+                                    aria-label="Select activation">
+                                    <span :class="selected.includes({{ $a->id }}) ? 'translate-x-6' : 'translate-x-1'"
+                                        class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"></span>
+                                </button>
                             </td>
                             <td class="font-mono text-xs"><a href="{{ route('licenses.show', $a->license) }}" class="text-brand-700 hover:underline">{{ optional($a->license)->key }}</a></td>
                             <td class="text-slate-600">{{ optional(optional($a->license)->product)->name }}</td>

@@ -101,6 +101,13 @@
                     ['Locations', route('locations.index'), 'home', request()->routeIs('locations.*')],
                 ]],
         ];
+        $activeGroupItems = null;
+        foreach ($nav as $navItem) {
+            if (($navItem['type'] ?? '') === 'group' && ($navItem['active'] ?? false)) {
+                $activeGroupItems = $navItem['items'];
+                break;
+            }
+        }
     @endphp
     <header x-data="{ mobileOpen: false }" class="bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-slate-200 sticky top-0 z-30">
         <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
@@ -243,6 +250,11 @@
             @if (request()->routeIs('settings.*'))
                 <div class="settings-shell">
                     <aside class="settings-aside"><x-settings-tabs /></aside>
+                    <div>{{ $slot }}</div>
+                </div>
+            @elseif ($activeGroupItems)
+                <div class="settings-shell">
+                    <aside class="settings-aside"><x-side-menu :items="$activeGroupItems" /></aside>
                     <div>{{ $slot }}</div>
                 </div>
             @else

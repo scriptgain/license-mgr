@@ -54,12 +54,7 @@
                         @else
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 @foreach ($p->features as $feature)
-                                    <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                                        <input type="checkbox" name="features[]" value="{{ $feature->id }}"
-                                            @checked(in_array($feature->id, $checkedFeatures))
-                                            class="rounded border-slate-300 text-brand-600 focus:ring-brand-500">
-                                        {{ $feature->name }}
-                                    </label>
+                                    <x-check-switch name="features[]" :value="$feature->id" :checked="in_array($feature->id, $checkedFeatures)">{{ $feature->name }}</x-check-switch>
                                 @endforeach
                             </div>
                         @endif

@@ -85,6 +85,7 @@ Route::middleware(['auth', 'security.policy'])->group(function () {
 
     // Activations (read + release).
     Route::get('activations', [ActivationController::class, 'index'])->name('activations.index');
+    Route::delete('activations/bulk', [ActivationController::class, 'bulkDestroy'])->name('activations.bulk-destroy');
     Route::delete('activations/{activation}', [ActivationController::class, 'destroy'])->name('activations.destroy');
 
     // License servers (verification nodes).

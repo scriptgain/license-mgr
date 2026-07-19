@@ -1,13 +1,7 @@
 @props(['title', 'subtitle' => null, 'icon' => null, 'back' => null])
-{{-- Slim page header (house style). Optional breadcrumb-style back link above
+{{-- Slim page header (house style). Optional back button, floated right above
      the title; title + optional subtitle on the left, actions slot on the right. --}}
 <div {{ $attributes->merge(['class' => 'pb-5']) }}>
-    @if ($back && ! request()->routeIs('settings.*'))
-        <a href="{{ $back['href'] }}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-700 transition mb-2">
-            <x-icon name="chevron-left" class="w-4 h-4" />
-            {{ $back['label'] }}
-        </a>
-    @endif
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3 min-w-0">
             @if ($icon)

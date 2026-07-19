@@ -17,6 +17,7 @@
     <x-accent-style />
 </head>
 <body class="h-full min-h-full bg-slate-50">
+<x-demo-banner />
 <div class="min-h-full flex flex-col">
 
     {{-- Brand accent hairline --}}
@@ -81,21 +82,24 @@
         $nav = [
             ['type' => 'link', 'label' => 'Dashboard', 'href' => route('dashboard'), 'icon' => 'dashboard',
                 'active' => request()->routeIs('dashboard')],
-            ['type' => 'group', 'label' => 'Infrastructure', 'icon' => 'server',
-                'active' => request()->routeIs('locations.*', 'directors.*', 'hosts.*', 'repositories.*'),
+            ['type' => 'group', 'label' => 'Licensing', 'icon' => 'license-key',
+                'active' => request()->routeIs('licenses.*', 'customers.*', 'activations.*'),
                 'items' => [
-                    ['Locations', route('locations.index'), 'home', request()->routeIs('locations.*')],
-                    ['Directors', route('directors.index'), 'cloud', request()->routeIs('directors.*')],
-                    ['Hosts', route('hosts.index'), 'server', request()->routeIs('hosts.*')],
-                    ['Repositories', route('repositories.index'), 'archive', request()->routeIs('repositories.*')],
+                    ['Licenses', route('licenses.index'), 'license-key', request()->routeIs('licenses.*')],
+                    ['Customers', route('customers.index'), 'users', request()->routeIs('customers.*')],
+                    ['Activations', route('activations.index'), 'check-circle', request()->routeIs('activations.*')],
                 ]],
-            ['type' => 'group', 'label' => 'Backups', 'icon' => 'clock',
-                'active' => request()->routeIs('jobs.*', 'schedule-templates.*', 'snapshots.*', 'restores.*'),
+            ['type' => 'group', 'label' => 'Catalog', 'icon' => 'archive',
+                'active' => request()->routeIs('products.*', 'plans.*'),
                 'items' => [
-                    ['Backup Jobs', route('jobs.index'), 'clock', request()->routeIs('jobs.*')],
-                    ['Schedule Templates', route('schedule-templates.index'), 'clock', request()->routeIs('schedule-templates.*')],
-                    ['Snapshots', route('snapshots.index'), 'archive', request()->routeIs('snapshots.*')],
-                    ['Restores', route('restores.index'), 'restore', request()->routeIs('restores.*')],
+                    ['Products', route('products.index'), 'archive', request()->routeIs('products.*')],
+                    ['Plans', route('plans.index'), 'database', request()->routeIs('plans.*')],
+                ]],
+            ['type' => 'group', 'label' => 'Servers', 'icon' => 'server',
+                'active' => request()->routeIs('servers.*', 'locations.*'),
+                'items' => [
+                    ['License Servers', route('servers.index'), 'server', request()->routeIs('servers.*')],
+                    ['Locations', route('locations.index'), 'home', request()->routeIs('locations.*')],
                 ]],
         ];
         // If the current route is inside a top-nav group, expose that group's items
@@ -153,7 +157,7 @@
                     </nav>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <x-button href="{{ route('jobs.create') }}" icon="plus" size="sm"><span class="hidden sm:inline">New Backup Job</span><span class="sm:hidden">New Job</span></x-button>
+                    <x-button href="{{ route('licenses.create') }}" icon="plus" size="sm"><span class="hidden sm:inline">Issue License</span><span class="sm:hidden">Issue</span></x-button>
                 </div>
             </div>
         </div>
@@ -198,13 +202,12 @@
         $section = strtok($rn, '.');
         $sectionMap = [
             'locations' => ['Locations', 'locations.index'],
-            'directors' => ['Directors', 'directors.index'],
-            'hosts' => ['Hosts', 'hosts.index'],
-            'repositories' => ['Repositories', 'repositories.index'],
-            'jobs' => ['Backup Jobs', 'jobs.index'],
-            'snapshots' => ['Snapshots', 'snapshots.index'],
-            'restores' => ['Restores', 'restores.index'],
-            'schedule-templates' => ['Schedule Templates', 'schedule-templates.index'],
+            'licenses' => ['Licenses', 'licenses.index'],
+            'customers' => ['Customers', 'customers.index'],
+            'activations' => ['Activations', 'activations.index'],
+            'products' => ['Products', 'products.index'],
+            'plans' => ['Plans', 'plans.index'],
+            'servers' => ['License Servers', 'servers.index'],
             'settings' => ['Settings', 'settings.index'],
         ];
         $crumbs = [];

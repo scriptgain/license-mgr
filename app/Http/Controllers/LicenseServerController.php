@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\License;
 use App\Models\LicenseServer;
 use App\Models\Location;
-use App\Models\Setting;
 use App\Models\User;
 use App\Services\SigningKey;
 use Illuminate\Http\Request;
@@ -23,18 +22,13 @@ class LicenseServerController extends Controller
         return view('servers.index', [
             'servers' => $servers,
             'replicable' => $replicable,
-            'limit' => $this->additionalLimit(),
-            'used' => $this->additionalUsed(),
-            'canAdd' => $this->canAddAdditional(),
+            // Self-hosted LicenseMGR allows unlimited verification nodes.
+            'canAdd' => true,
         ]);
     }
 
     public function create()
     {
-        if (! $this->canAddAdditional()) {
-            return $this->limitRedirect();
-        }
-
         return view('servers.create', [
             'locations' => Location::orderByDesc('is_default')->orderBy('name')->get(),
             'defaultLocationId' => optional(Location::default())->id,
@@ -44,10 +38,6 @@ class LicenseServerController extends Controller
 
     public function store(Request $request)
     {
-        if (! $this->canAddAdditional()) {
-            return $this->limitRedirect();
-        }
-
         $data = $this->validated($request);
         $data['user_id'] = $this->resolveOwner($request);
         unset($data['owner_id']);
@@ -149,34 +139,6 @@ class LicenseServerController extends Controller
 
         $ids = array_values(array_unique(array_filter(array_map('intval', (array) $request->input('assignees', [])))));
         $model->syncAssignees($ids);
-    }
-
-    // --- entitlement gate -------------------------------------------------
-
-    /** Additional (non-local) servers this instance's license permits. */
-    private function additionalLimit(): int
-    {
-        return (int) Setting::get('license_server_limit', 0);
-    }
-
-    private function additionalUsed(): int
-    {
-        return LicenseServer::additional()->count();
-    }
-
-    private function canAddAdditional(): bool
-    {
-        return $this->additionalUsed() < $this->additionalLimit();
-    }
-
-    private function limitRedirect()
-    {
-        $limit = $this->additionalLimit();
-        $msg = $limit === 0
-            ? 'Additional license servers require license entitlement. The main panel is included; add licenses to run more nodes.'
-            : "You've reached your limit of {$limit} additional license server(s). Add licenses to run more nodes.";
-
-        return redirect()->route('servers.index')->with('warning', $msg);
     }
 
     /** One-line installer for the node (pulls + verifies against this panel). */

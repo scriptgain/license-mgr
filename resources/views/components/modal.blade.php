@@ -1,10 +1,10 @@
 @props(['name', 'title' => null, 'icon' => null, 'tone' => 'default', 'maxWidth' => 'max-w-lg'])
 @php
     $toneChip = [
-        'default' => 'bg-brand-50 text-brand-600 ring-brand-100',
-        'danger' => 'bg-rose-50 text-rose-600 ring-rose-100',
-        'warn' => 'bg-amber-50 text-amber-600 ring-amber-100',
-    ][$tone] ?? 'bg-brand-50 text-brand-600 ring-brand-100';
+        'default' => 'bg-brand-50 text-brand-600 ring-brand-200',
+        'danger' => 'bg-rose-50 text-rose-600 ring-rose-200',
+        'warn' => 'bg-amber-50 text-amber-600 ring-amber-200',
+    ][$tone] ?? 'bg-brand-50 text-brand-600 ring-brand-200';
 @endphp
 {{-- Accessible modal (replaces native confirm/alert/prompt).
      Open:  $dispatch('open-modal', '{{ $name }}')   Close: $dispatch('close-modal', '{{ $name }}') --}}

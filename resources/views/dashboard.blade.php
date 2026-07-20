@@ -71,7 +71,7 @@
             <div class="group relative flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-sm transition hover:shadow-md hover:ring-brand-200">
                 <span class="h-1 w-full bg-gradient-to-r from-brand-400 to-brand-600"></span>
                 <div class="flex flex-1 items-center gap-4 p-5">
-                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-200">
                         <x-icon :name="$k['icon']" class="h-5 w-5" />
                     </span>
                     <div class="ml-auto text-right">
@@ -128,7 +128,7 @@
             <x-slot:footer>
                 <div class="flex items-center gap-6">
                     <div class="flex items-center gap-2.5">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg {{ $expiringSoon ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-100' : 'bg-white text-slate-400 ring-1 ring-slate-200' }}"><x-icon name="clock" class="h-4 w-4" /></span>
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg {{ $expiringSoon ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-200' : 'bg-white text-slate-400 ring-1 ring-slate-200' }}"><x-icon name="clock" class="h-4 w-4" /></span>
                         <div>
                             <p class="text-lg font-semibold leading-tight tabular {{ $expiringSoon ? 'text-amber-600' : 'text-slate-900' }}">{{ $expiringSoon }}</p>
                             <p class="text-xs text-slate-500">Expiring · 30 days</p>
@@ -136,7 +136,7 @@
                     </div>
                     <span class="h-9 w-px bg-slate-200"></span>
                     <div class="flex items-center gap-2.5">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg {{ $revoked ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-100' : 'bg-white text-slate-400 ring-1 ring-slate-200' }}"><x-icon name="x-circle" class="h-4 w-4" /></span>
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg {{ $revoked ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-200' : 'bg-white text-slate-400 ring-1 ring-slate-200' }}"><x-icon name="x-circle" class="h-4 w-4" /></span>
                         <div>
                             <p class="text-lg font-semibold leading-tight tabular {{ $revoked ? 'text-rose-600' : 'text-slate-900' }}">{{ $revoked }}</p>
                             <p class="text-xs text-slate-500">Revoked keys</p>
@@ -262,7 +262,7 @@
                             <tr class="cursor-pointer" onclick="window.location='{{ route('servers.show', $s) }}'">
                                 <td>
                                     <div class="flex items-center gap-2.5 min-w-0">
-                                        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-100"><x-icon name="server" class="h-4 w-4" /></span>
+                                        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-200"><x-icon name="server" class="h-4 w-4" /></span>
                                         <div class="min-w-0">
                                             <div class="font-medium text-slate-900 truncate">{{ $s->name }}</div>
                                             @if (optional($s->location)->name)

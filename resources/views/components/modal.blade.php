@@ -32,13 +32,13 @@
                 </span>
             @endif
             <div class="min-w-0 flex-1 pt-0.5">
-                <h3 class="text-base font-semibold text-slate-900">{{ $title }}</h3>
+                <h3 class="text-xl font-semibold text-slate-900 leading-snug break-words">{{ $title }}</h3>
             </div>
             <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 rounded-lg p-1 -m-1 shrink-0">
                 <x-icon name="x" class="w-5 h-5" />
             </button>
         </div>
-        <div class="px-6 py-4 {{ $icon ? 'sm:pl-20' : '' }} text-sm text-slate-600 leading-relaxed">
+        <div class="vx-wrap vx-scroll max-h-[70vh] overflow-y-auto overflow-x-hidden px-6 py-4 {{ $icon ? 'sm:pl-20' : '' }} text-sm text-slate-600 leading-relaxed">
             {{ $slot }}
         </div>
         @isset($footer)

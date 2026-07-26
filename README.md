@@ -3,7 +3,7 @@
 **Issue and enforce licence keys for software you sell.** Self-hosted, by
 [ScriptGain](https://scriptgain.com).
 
-**[Try the live demo →](https://license-demo.scriptgain.com)** — no signup required.
+**[Try the live demo →](https://license-demo.scriptgain.com)** No signup required.
 
 ## Who it's for
 
@@ -42,7 +42,7 @@ in-place signed updates.
 
 ## Current state
 
-**Version 1.1.2.** In production use — this is the system ScriptGain uses to
+**Version 1.1.2.** In production use. This is the system ScriptGain uses to
 license its own products, so the validation, activation, and entitlement paths are
 exercised daily rather than only in tests.
 
@@ -62,7 +62,7 @@ curl -fsSL https://install.scriptgain.com | sudo bash -s -- license-mgr DOMAIN=l
 ```
 
 Then open `https://your.domain/setup` to create the first account and enter your
-licence key. Yes — LicenseMGR is itself licensed.
+licence key. Yes, LicenseMGR is itself licensed.
 
 ## Where things live
 
@@ -90,7 +90,7 @@ Maintenance tasks from the command line:
 ## Requirements
 
 A Linux server with PHP 8.3 and MySQL or MariaDB. Licence checks are small and
-frequent, so put it somewhere with reliable uptime — your customers' software
+frequent, so put it somewhere with reliable uptime, because your customers' software
 depends on it answering.
 
 ## Licensing

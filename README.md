@@ -1,58 +1,100 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LicenseMGR
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Issue and enforce licence keys for software you sell.** Self-hosted, by
+[ScriptGain](https://scriptgain.com).
 
-## About Laravel
+**[Try the live demo →](https://license-demo.scriptgain.com)** — no signup required.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Who it's for
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Anyone selling software that needs to check whether the copy running is paid for:
+desktop applications, self-hosted web apps, plugins, WordPress themes, game
+servers, or firmware. If you are currently doing this with a spreadsheet of keys
+and an honour system, this replaces both.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## What it does
 
-## Learning Laravel
+**Define what you sell**
+Products, plans, and features. A licence carries the features its plan includes, so
+your application can ask "is reporting enabled for this key" instead of hardcoding
+tiers.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Issue keys**
+Generate keys in your own format, individually or in bulk, tied to a customer.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Enforce activation limits**
+Each licence has a seat count. Activations record which machine, host, or domain
+used the key, so a licence sold for one server cannot quietly run on nine. Revoke
+an activation and the seat frees up.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+**Answer your app's questions**
+Your software calls the API to validate a key, activate a machine, and check
+feature entitlements. Signed responses so a client can verify what came back.
 
-## Agentic Development
+**Handle the awkward cases**
+Customers, locations, and licence servers for on-premise customers who cannot reach
+the internet.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+**Run it like production**
+Users and roles, two-factor authentication, an IP firewall with an escape hatch,
+API tokens, a full audit log, database backups, host and SSL settings, and
+in-place signed updates.
 
-```bash
-composer require laravel/boost --dev
+## Current state
 
-php artisan boost:install
+**Version 1.1.2.** In production use — this is the system ScriptGain uses to
+license its own products, so the validation, activation, and entitlement paths are
+exercised daily rather than only in tests.
+
+## One thing to know about statuses
+
+A licence's real status resolves through its status record's behaviour, not through
+a free-text field. If you integrate directly against the database rather than the
+API, check the resolved status; the plain text column is a label, not the authority.
+The API always returns the resolved answer.
+
+## Install
+
+Point a fresh Debian or Ubuntu server at your domain and run, as root:
+
+```
+curl -fsSL https://install.scriptgain.com | sudo bash -s -- license-mgr DOMAIN=licenses.example.com SSL=1 EMAIL=you@example.com
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Then open `https://your.domain/setup` to create the first account and enter your
+licence key. Yes — LicenseMGR is itself licensed.
 
-## Contributing
+## Where things live
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Surface | Path |
+| --- | --- |
+| Console | `/` |
+| Validation and activation API | `/api` |
+| First-run setup | `/setup` |
 
-## Code of Conduct
+## Running it
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Products, plans, features, keys, and every operator setting are managed in the
+console rather than in files on the server.
 
-## Security Vulnerabilities
+Maintenance tasks from the command line:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Command | What it does |
+| --- | --- |
+| `php artisan license:maintenance` | Expires lapsed licences and trims the audit log. |
+| `php artisan license:check-online` | Re-validates this instance's own licence. |
+| `php artisan app:update` | Applies a signed release. |
+| `php artisan db-backup:run` | Backs up the database. |
+| `php artisan firewall:clear` | Gets you back in if an IP rule locks you out. |
 
-## License
+## Requirements
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+A Linux server with PHP 8.3 and MySQL or MariaDB. Licence checks are small and
+frequent, so put it somewhere with reliable uptime — your customers' software
+depends on it answering.
+
+## Licensing
+
+One activation per licence by default, validated against
+`https://scriptgain.com/v1`. Buy or manage yours at
+[scriptgain.com/products/licensemanager](https://scriptgain.com/products/licensemanager).

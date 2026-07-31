@@ -37,6 +37,28 @@ return [
     // Empty disables the fallback. Update on every guard rebuild.
     'guard_sha256' => env('LICENSE_GUARD_SHA256', '7593ce44cff3194003c7774b7e12adee49fe954f553840bf3adc69e64a34396a'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Issuing (this instance as a license server for its own customers)
+    |--------------------------------------------------------------------------
+    */
+
+    // How long a signed validation response stays current. The payload carries
+    // offline_expires_at, so a cached or replicated copy expires by itself; this
+    // is therefore the worst case delay before a revocation reaches an install
+    // that has gone quiet. Shorter is stricter, but a customer offline for longer
+    // than this drops to the offline .lic path.
+    'lease_days' => (int) env('LICENSE_LEASE_DAYS', 14),
+
+    // Lease on licenses replicated to verification nodes. Shorter than the client
+    // lease: nodes are expected to sync constantly, so a node that goes dark
+    // should stop vouching for licenses quickly.
+    'node_lease_days' => (int) env('LICENSE_NODE_LEASE_DAYS', 7),
+
+    // Freshness window applied to ScriptGain's answers on the phone-home path.
+    'response_max_age_minutes' => (int) env('LICENSE_RESPONSE_MAX_AGE_MINUTES', 10),
+    'response_skew_minutes' => (int) env('LICENSE_RESPONSE_SKEW_MINUTES', 5),
+
     // How often the online check runs (scheduled + opportunistic boot check).
     'online_check_interval_days' => (int) env('LICENSE_ONLINE_INTERVAL_DAYS', 2),
 

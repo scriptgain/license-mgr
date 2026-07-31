@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Activation;
 use App\Models\License;
+use App\Services\LicenseSigner;
 use App\Services\SigningKey;
 use Illuminate\Http\Request;
 
@@ -22,19 +23,32 @@ class ValidationController extends Controller
             'key' => ['required', 'string'],
             'fingerprint' => ['nullable', 'string', 'max:190'],
             'hostname' => ['nullable', 'string', 'max:190'],
+            // Optional single use challenge. Signed back into the payload so a
+            // caller can prove the answer was minted for its own request rather
+            // than replayed from a capture.
+            'nonce' => ['nullable', 'string', 'max:128'],
         ]);
+
+        $nonce = $data['nonce'] ?? null;
 
         $license = License::with(['product', 'plan'])->where('key', $data['key'])->first();
 
         if (! $license) {
-            return response()->json(['valid' => false, 'reason' => 'not_found'], 404);
+            return response()->json($this->signedNegative($data['key'], 'not_found', $nonce), 404);
         }
 
         if (! $license->isValid()) {
+            // Signed, so a client can trust a refusal as much as an approval. An
+            // unsigned negative can be forged by anything on the wire, which turns
+            // a proxy into a kill switch for a paying customer.
+            $payload = $license->leasedPayload($nonce) + ['valid' => false, 'reason' => $license->effectiveStatus()];
+
             return response()->json([
                 'valid' => false,
                 'reason' => $license->effectiveStatus(),
-                'license' => $license->canonicalPayload(),
+                'license' => $payload,
+                'signature' => LicenseSigner::signPayload($payload),
+                'algorithm' => 'RSA-SHA256',
             ], 200);
         }
 
@@ -42,20 +56,46 @@ class ValidationController extends Controller
         if (! empty($data['fingerprint'])) {
             $seat = $this->registerActivation($license, $data);
             if ($seat === 'over_limit') {
-                return response()->json([
-                    'valid' => false,
-                    'reason' => 'activation_limit',
-                    'max_activations' => $license->max_activations,
-                ], 200);
+                return response()->json(
+                    $this->signedNegative($license->key, 'activation_limit', $nonce)
+                    + ['max_activations' => $license->max_activations], 200);
             }
         }
 
+        // Signed per response, not the stored static signature: the payload now
+        // carries issued_at and a lease, so a cached copy stops being current on
+        // its own and a revocation cannot be outrun by simply never calling again.
+        $payload = $license->leasedPayload($nonce);
+
         return response()->json([
             'valid' => true,
-            'license' => $license->canonicalPayload(),
-            'signature' => $license->signature,
+            'license' => $payload,
+            'signature' => LicenseSigner::signPayload($payload),
             'algorithm' => 'RSA-SHA256',
+            'lease_expires_at' => $payload['offline_expires_at'],
         ]);
+    }
+
+    /** A signed "no", so a client can tell a real refusal from a hostile proxy. */
+    private function signedNegative(string $key, string $reason, ?string $nonce): array
+    {
+        $payload = [
+            'key' => $key,
+            'valid' => false,
+            'reason' => $reason,
+            'issued_at' => now()->toIso8601String(),
+        ];
+        if ($nonce !== null && $nonce !== '') {
+            $payload['nonce'] = $nonce;
+        }
+
+        return [
+            'valid' => false,
+            'reason' => $reason,
+            'license' => $payload,
+            'signature' => LicenseSigner::signPayload($payload),
+            'algorithm' => 'RSA-SHA256',
+        ];
     }
 
     /** GET /api/v1/public-key — clients pin this to verify signatures offline. */

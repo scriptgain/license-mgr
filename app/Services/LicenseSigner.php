@@ -28,6 +28,14 @@ class LicenseSigner
         return base64_encode($signature);
     }
 
+    /** Sign any canonical payload (leased validation responses, negatives). */
+    public static function signPayload(array $payload): string
+    {
+        openssl_sign(self::canonicalJson($payload), $signature, SigningKey::privateKey(), OPENSSL_ALGO_SHA256);
+
+        return base64_encode($signature);
+    }
+
     /** Sign and persist onto the model. */
     public static function apply(License $license): void
     {

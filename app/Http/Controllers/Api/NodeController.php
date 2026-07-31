@@ -41,10 +41,20 @@ class NodeController extends Controller
     {
         $node = $this->node($request);
 
-        $licenses = License::replicable()->with(['product', 'plan'])->get()->map(fn (License $l) => [
-            'license' => $l->canonicalPayload(),
-            'signature' => $l->signature,
-        ])->all();
+        // Leased on every sync. A node that stops syncing (unplugged, or kept
+        // offline deliberately) therefore serves licences that expire rather than
+        // licences that live forever, so a revocation reaches the edge within one
+        // node lease even if that node never talks to the panel again.
+        $leaseDays = (int) config('licensing.node_lease_days', 7);
+
+        $licenses = License::replicable()->with(['product', 'plan'])->get()->map(function (License $l) use ($leaseDays) {
+            $payload = $l->leasedPayload(null, $leaseDays);
+
+            return [
+                'license' => $payload,
+                'signature' => \App\Services\LicenseSigner::signPayload($payload),
+            ];
+        })->all();
 
         $node->update(['last_sync_at' => now(), 'license_count' => count($licenses)]);
 

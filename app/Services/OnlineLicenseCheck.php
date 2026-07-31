@@ -54,6 +54,11 @@ class OnlineLicenseCheck
         $url = (string) config('licensing.validate_url', 'https://scriptgain.com/v1/validate');
         $domain = parse_url((string) config('app.url'), PHP_URL_HOST) ?: '';
 
+        // Single use challenge. ScriptGain signs it back into the payload, which is
+        // what separates a fresh answer from a recording. Without it, one captured
+        // "valid" response replays forever from a static file or a hosts entry.
+        $nonce = bin2hex(random_bytes(16));
+
         try {
             $resp = Http::timeout(8)
                 ->acceptJson()
@@ -62,6 +67,7 @@ class OnlineLicenseCheck
                     'key' => $key,
                     'hostname' => gethostname() ?: '',
                     'domain' => $domain,
+                    'nonce' => $nonce,
                 ]);
         } catch (\Throwable $e) {
             // Network error / timeout -> unreachable (grace applies).
@@ -100,7 +106,15 @@ class OnlineLicenseCheck
             return $this->inconclusive('Validation response signature did not verify; ignoring.');
         }
 
-        // Genuine, ScriptGain-signed answer.
+        // Signed by ScriptGain, but is it an answer to THIS check? A replayed
+        // response has a perfectly genuine signature, so freshness is a separate
+        // test. Inconclusive rather than invalid: a replay attempt or a clock that
+        // has drifted must never lock a customer out on its own.
+        if ($why = $this->freshnessProblem($body['response'], $nonce)) {
+            return $this->inconclusive($why);
+        }
+
+        // Genuine, ScriptGain-signed answer to this exact check.
         $response = $body['response'];
 
         if (($response['valid'] ?? null) === true) {

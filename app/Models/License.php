@@ -114,6 +114,44 @@ class License extends Model
      * Canonical, order-stable payload that gets signed and shipped to nodes.
      * Nodes verify this against the public key to validate offline.
      */
+    /**
+     * The payload a validation response carries: the canonical claims plus a
+     * lease.
+     *
+     * The stored signature covers canonicalPayload() only, which has no time in
+     * it at all. That makes a cached copy immortal: a node or a customer app can
+     * verify it offline forever, and a revocation issued afterwards never reaches
+     * them (for a perpetual key, expires_at is null, so nothing ever stops it).
+     * A lease fixes that without any client having to phone home more often: the
+     * blob simply stops verifying as current once offline_expires_at passes, so
+     * the worst case exposure after a revocation is one lease period.
+     *
+     * The field is named offline_expires_at to match ScriptGain's own .lic
+     * format, so the two license shapes in this product line stay consistent.
+     * Note these payloads are verified by the CUSTOMER's app or a verification
+     * node against this instance's SigningKey, not by OfflineLicenseVerifier,
+     * which is the opposite direction (it checks this instance's own license
+     * against ScriptGain's key).
+     */
+    public function leasedPayload(?string $nonce = null, ?int $leaseDays = null): array
+    {
+        $days = $leaseDays ?? (int) config('licensing.lease_days', 14);
+
+        // 'valid' makes the payload self-describing, so a consumer never has to
+        // infer entitlement from the HTTP envelope, which is not signed.
+        $payload = $this->canonicalPayload() + [
+            'valid' => $this->isValid(),
+            'issued_at' => now()->toIso8601String(),
+            'offline_expires_at' => now()->addDays(max(1, $days))->toIso8601String(),
+        ];
+
+        if ($nonce !== null && $nonce !== '') {
+            $payload['nonce'] = $nonce;
+        }
+
+        return $payload;
+    }
+
     public function canonicalPayload(): array
     {
         return [

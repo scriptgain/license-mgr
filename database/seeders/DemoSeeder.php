@@ -93,7 +93,12 @@ class DemoSeeder extends Seeder
                     'product_id' => $prod->id, 'customer_id' => $cust->id, 'key' => $mkKey($prod->key_prefix),
                     'status' => $status, 'max_activations' => $ma,
                     'expires_at' => $status === 'expired' ? now()->subDays(random_int(5, 60)) : now()->addDays(random_int(30, 400)),
-                    'entitlements' => ['features' => ['api', 'priority-support']],
+                    // A FLAT list of feature codes, which is what LicenseIssuer writes
+                    // (array_values) and what the show view iterates. This used to be
+                    // ['features' => [...]], one level deeper, so every seeded licence
+                    // handed the view an array where it expected a string and
+                    // /licenses/{id} returned a 500 for all nineteen of them.
+                    'entitlements' => ['api', 'priority-support'],
                     'customer_name' => $cn, 'customer_email' => $email, 'signed_at' => now()->subDays(random_int(1, 120)),
                 ]);
                 $totalLic++;

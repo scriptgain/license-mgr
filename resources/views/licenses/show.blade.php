@@ -84,9 +84,17 @@
                 @if (empty($license->entitlements))
                     <p class="text-sm text-slate-500">No feature entitlements on this license.</p>
                 @else
+                    {{-- Flattened, and each value forced to a string.
+
+                         entitlements is a JSON column, so what is in it is whatever
+                         wrote the row. A licence issued through LicenseIssuer holds a
+                         flat list of codes, but a row written any other way can nest a
+                         level, and echoing an array into {{ }} is a 500 for the whole
+                         page rather than one odd looking badge. A detail page should
+                         not be destroyed by one malformed column. --}}
                     <div class="flex flex-wrap gap-2">
-                        @foreach ($license->entitlements as $code)
-                            <x-badge color="info">{{ $code }}</x-badge>
+                        @foreach (\Illuminate\Support\Arr::flatten((array) $license->entitlements) as $code)
+                            <x-badge color="info">{{ is_scalar($code) ? $code : json_encode($code) }}</x-badge>
                         @endforeach
                     </div>
                 @endif
